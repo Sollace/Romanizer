@@ -1,18 +1,23 @@
 package com.sollace.romanizer.impl.parser;
 
-import com.sollace.romanizer.api.parser.Parser;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
-public class NumberToRoman implements Parser<Number, String> {
+import com.sollace.romanizer.api.parser.Converter;
+
+public class NumberToRoman implements Converter<Number, String> {
 
     @Override
-    public String parse(Number from) {
+    public String convertTo(Number from, Locale locale) {
         boolean neg = from.doubleValue() < 0;
         long iFrom = Math.abs(from.longValue());
 
         StringBuilder output = new StringBuilder();
 
+        DecimalFormatSymbols d = DecimalFormatSymbols.getInstance(locale);
+
         if (neg) {
-            output.append(Symbols.NEGATIVE_SIGN);
+            output.append(d.getMinusSign());
         }
 
         // 99
@@ -24,8 +29,8 @@ public class NumberToRoman implements Parser<Number, String> {
 
         double dFrom = Math.abs(from.doubleValue());
         if (dFrom > 0) {
-            output.append(Symbols.DECIMAL_POINT);
-            parseLong(Symbols.getFractionalComponent(dFrom), output);
+            output.append(d.getDecimalSeparator());
+            parseLong(Symbols.getFractionalComponent(dFrom, locale), output);
         }
         return output.toString();
     }

@@ -1,11 +1,10 @@
 package com.sollace.romanizer.impl.parser;
 
+import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
+import java.util.Locale;
 
 public interface Symbols {
-    String NEGATIVE_SIGN = "-";
-    String DECIMAL_POINT = ".";
-
     String ZERO = "";
     String ONE = "I";
     String FIVE = "V";
@@ -48,15 +47,16 @@ public interface Symbols {
         return VALUES.length - 1;
     }
 
-    static String[] splitFraction(String realNumber) {
-        String[] wholeFacture = realNumber.split("\\.");
+    static String[] splitFraction(String realNumber, Locale locale) {
+        DecimalFormatSymbols d = DecimalFormatSymbols.getInstance(locale);
+        String[] wholeFacture = realNumber.split("\\" + d.getDecimalSeparator());
         if (wholeFacture.length > 2) {
             throw new NumberFormatException("Multiple fractional units: " + wholeFacture.length + " for input: " + realNumber);
         }
         return wholeFacture;
     }
 
-    static long getFractionalComponent(Number realishNumber) {
-        return Long.valueOf(splitFraction(String.valueOf(realishNumber))[1]);
+    static long getFractionalComponent(Number realishNumber, Locale locale) {
+        return Long.valueOf(splitFraction(String.valueOf(realishNumber), locale)[1]);
     }
 }

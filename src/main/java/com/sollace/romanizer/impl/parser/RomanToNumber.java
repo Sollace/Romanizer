@@ -1,22 +1,34 @@
 package com.sollace.romanizer.impl.parser;
 
+import java.text.DecimalFormatSymbols;
 import java.util.*;
 
-import com.sollace.romanizer.api.parser.Parser;
+import com.sollace.romanizer.api.parser.Converter;
 
-public class RomanToNumber implements Parser<String, Number> {
+public class RomanToNumber implements Converter<String, Number> {
 
     @Override
-    public Number parse(String from) {
+    public Number convertTo(String from, Locale locale) {
 
-        String[] wholeFracture = Symbols.splitFraction(from);
+        DecimalFormatSymbols d = DecimalFormatSymbols.getInstance(locale);
+        boolean negative = false;
+        if (from.charAt(0) == d.getMinusSign()) {
+            from = from.substring(1);
+            negative = true;
+        }
+
+        String[] wholeFracture = Symbols.splitFraction(from, locale);
         int[] power = new int[1];
         long whole = parseInteger(wholeFracture[0], power);
         power[0] = 1;
         long fraction = wholeFracture.length > 1 ? parseInteger(wholeFracture[1], power) : 0;
 
         if (fraction > 0) {
-            return whole + (fraction / (power[0] > 1 ? (double)Math.pow(10F, power[0]) : 1D));
+            whole += (fraction / (power[0] > 1 ? (double)Math.pow(10F, power[0]) : 1D));
+        }
+
+        if (negative) {
+            return -whole;
         }
 
         return whole;

@@ -1,0 +1,40 @@
+plugins {
+	id 'java-library'
+	id 'maven-publish'
+	id 'eclipse'
+	id 'idea'
+	id 'org.ajoberstar.reckon' version '0.13.0'
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+	withSourcesJar()
+}
+
+group = project.group
+description = project.displayname
+archivesBaseName = project.name
+
+reckon {
+	scopeFromProp()
+	stageFromProp('beta', 'rc', 'final')
+}
+
+repositories {
+	mavenLocal()
+}
+
+dependencies {
+
+}
+
+processResources {
+	inputs.property "version", project.version.toString()
+	from 'LICENSE'
+}
+
+tasks.withType(JavaCompile) {
+	options.encoding = "UTF-8"
+}

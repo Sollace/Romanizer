@@ -72,6 +72,8 @@ public interface Symbols {
     }
 
     static long getFractionalComponent(Number realishNumber, Locale locale) {
-        return Long.valueOf(splitFraction(String.valueOf(realishNumber), locale)[1]);
+        // TODO: Need better fractional handling
+        return 0;
+        //return Long.valueOf(splitFraction(String.format(locale, "%.90f", realishNumber.doubleValue()), locale)[1]);
     }
 }

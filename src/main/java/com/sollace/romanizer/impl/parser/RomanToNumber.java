@@ -9,8 +9,7 @@ public class RomanToNumber implements Converter<String, Number> {
 
     @Override
     public Number convertTo(String from, Locale locale) {
-
-        if ("nulla".equalsIgnoreCase(from)) {
+        if (Symbols.ZERO.equalsIgnoreCase(from)) {
             return 0;
         }
 
@@ -22,13 +21,12 @@ public class RomanToNumber implements Converter<String, Number> {
         }
 
         String[] wholeFracture = Symbols.splitFraction(from, locale);
-        int[] power = new int[1];
-        long whole = parseInteger(wholeFracture[0], power);
-        power[0] = 1;
-        long fraction = wholeFracture.length > 1 ? parseInteger(wholeFracture[1], power) : 0;
+        double whole = parseInteger(wholeFracture[0]);
+        long fraction = wholeFracture.length > 1 ? parseInteger(wholeFracture[1]) : 0;
 
         if (fraction > 0) {
-            whole += (fraction / (power[0] > 1 ? (double)Math.pow(10F, power[0]) : 1D));
+            int power = String.valueOf(fraction).length();
+            whole += (fraction / (power > 1 ? (double)Math.pow(10F, power) : 1D));
         }
 
         if (negative) {
@@ -38,7 +36,7 @@ public class RomanToNumber implements Converter<String, Number> {
         return whole;
     }
 
-    private long parseInteger(String from, int[] power) {
+    private long parseInteger(String from) {
         if ("0".contentEquals(from) || "nulla".equalsIgnoreCase(from)) {
             return 0L;
         }
@@ -69,8 +67,6 @@ public class RomanToNumber implements Converter<String, Number> {
                 entries.push(new StackEntry()).base = base;
             }
         }
-
-        power[0] = entries.size();
 
         return valueOf(entries);
     }

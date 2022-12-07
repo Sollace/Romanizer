@@ -14,7 +14,7 @@ public class NumberToRoman implements Converter<Number, String> {
         long dFrom = Symbols.getFractionalComponent(Math.abs(from.doubleValue()), locale);
 
         if (iFrom == 0 && dFrom == 0) {
-            return "nulla";
+            return Symbols.ZERO;
         }
 
         StringBuilder output = new StringBuilder();
@@ -27,7 +27,6 @@ public class NumberToRoman implements Converter<Number, String> {
 
         parseLong(iFrom, output);
 
-
         if (dFrom > 0) {
             output.append(d.getDecimalSeparator());
             parseLong(dFrom, output);
@@ -36,61 +35,70 @@ public class NumberToRoman implements Converter<Number, String> {
     }
 
     private void parseLong(long iFrom, StringBuilder output) {
-        parseHundreds(new PartitionedNumber(iFrom), output);
-    }
-
-    private void parseHundreds(PartitionedNumber n, StringBuilder output) {
-        long hundreds = n.hundreds();
-        if (hundreds > 3) {
-            parseLong(hundreds, output);
+        PartitionedNumber n = PartitionedNumber.create(iFrom);
+        long thousands = n.thousands();
+        if (thousands > 3) {
+            parseLong(thousands, output);
             output.append(Symbols.EXT_HUNDREDS);
-            output.append(Symbols.HUNDRED);
+            output.append(Symbols.THOUSAND);
         } else {
-            repeat(Symbols.HUNDRED, hundreds, output);
+            repeat(Symbols.THOUSAND, thousands, output);
         }
-        parseTens(n, output);
-    }
+        parseSecond(n.fiveHundreds(), Symbols.THOUSAND, Symbols.FIVE_HUNDRED, 2, output);
+        parseSecond(n.hundreds(), Symbols.FIVE_HUNDRED, Symbols.HUNDRED, 5, output);
 
-    private void parseTens(PartitionedNumber n, StringBuilder output) {
+        byte tens = (byte)(n.tens() + n.fifties() * 5);
 
-        long tens = n.tens();
-
-        if (n.tens() == 0) {
-            parseUnits(n, output);
-            return;
-        }
-
-        int index = Symbols.findNearest((int)tens);
-
-        int indexValue = Symbols.VALUES[index];
+        int indexValue = Symbols.VALUES[Symbols.findNearest(tens)];
 
         if (indexValue == 10) {
-            repeat(Symbols.TEN, 10 - n.tens(), output);
-
-            output.append(Symbols.HUNDRED);
+            byte units = (byte)(10 - n.units());
+            int unitIndexValue = Symbols.VALUES[Symbols.findNearest(units)];
+            if (tens == 9 && unitIndexValue < 3) {
+                parseGeneric(units, Symbols.ONE, output);
+                output.append(Symbols.HUNDRED);
+            } else {
+                repeat(Symbols.TEN, indexValue - tens, output);
+                output.append(Symbols.HUNDRED);
+                parseGeneric(n.units(), Symbols.ONE, output);
+            }
         } else {
-            repeat(Symbols.TEN, n.tens(), output);
+            parseSecond(n.fifties(), Symbols.HUNDRED, Symbols.FIFTY, 2, output);
+            parseSecond(n.tens(), Symbols.FIFTY, Symbols.TEN, 5, output);
+            parseGeneric(n.units(), Symbols.ONE, output);
         }
-
-        parseUnits(n, output);
     }
 
-    private void parseUnits(PartitionedNumber n, StringBuilder output) {
-        byte units = n.units();
+    private void parseSecond(byte units, String originSymbol, String offsetSymbol, int switchZone, StringBuilder output) {
         if (units == 0) {
             return;
         }
 
         int index = Symbols.findNearest(units);
+        int indexValue = Symbols.VALUES[index];
+
+        if (indexValue == switchZone) {
+            repeat(offsetSymbol, switchZone - units, output);
+            output.append(originSymbol);
+        } else {
+            repeat(offsetSymbol, units, output);
+        }
+    }
+
+    private void parseGeneric(byte units, String offsetSymbol, StringBuilder output) {
+        if (units == 0) {
+            return;
+        }
+        int index = Symbols.findNearest(units);
 
         int indexValue = Symbols.VALUES[index];
 
         if (units < indexValue) {
-            repeat(Symbols.ONE, indexValue - units, output);
+            repeat(offsetSymbol, indexValue - units, output);
         }
         output.append(Symbols.SYMBOLS[index]);
         if (units > indexValue) {
-            repeat(Symbols.ONE, units - indexValue, output);
+            repeat(offsetSymbol, units - indexValue, output);
         }
     }
 
@@ -101,10 +109,17 @@ public class NumberToRoman implements Converter<Number, String> {
     }
 
 
-    record PartitionedNumber (long hundreds, byte tens, byte units) {
-        PartitionedNumber(long number) {
-            this(number / 100L,
-                (byte)((number / 10) % 10),
+    record PartitionedNumber (long thousands, byte fiveHundreds, byte hundreds, byte fifties, byte tens, byte units) {
+        static PartitionedNumber create(long number) {
+            byte tens = (byte)((number / 10) % 10);
+            byte hundred = (byte)((number / 100) % 10);
+
+            return new PartitionedNumber(
+                number / 1000L,
+                (byte)(hundred / 5),
+                (byte)(hundred % 5),
+                (byte)(tens / 5),
+                (byte)(tens % 5),
                 (byte)(number % 10)
             );
         }

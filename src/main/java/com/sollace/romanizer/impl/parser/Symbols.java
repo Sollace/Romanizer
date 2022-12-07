@@ -4,17 +4,20 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 public interface Symbols {
-    String ZERO = "";
+    String ZERO = "nulla";
     String ONE = "I";
     String FIVE = "V";
     String TEN = "X";
+    String FIFTY = "L";
     String HUNDRED = "C";
+    String FIVE_HUNDRED = "D";
+    String THOUSAND = "M";
 
     String EXT_HUNDREDS = "/";
 
-    int[] VALUES = new int[] {0, 1, 5, 10, 100};
-    String[] SYMBOLS = new String[] { ZERO, ONE, FIVE, TEN, HUNDRED };
-    char[] CHAR_SYMBOLS = new char[] { 'I', 'V', 'X', 'C' };
+    int[] VALUES = new int[] { 0, 1, 5, 10, 50, 100, 500, 1000 };
+    String[] SYMBOLS = new String[] { ZERO, ONE, FIVE, TEN, FIFTY, HUNDRED, FIVE_HUNDRED, THOUSAND };
+    char[] CHAR_SYMBOLS = new char[] { 'I', 'V', 'X', 'L', 'C', 'D', 'M' };
 
     static int valueOf(char symbol) {
         symbol = Character.toUpperCase(symbol);

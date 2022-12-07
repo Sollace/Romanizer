@@ -11,6 +11,11 @@ public class NumberToRoman implements Converter<Number, String> {
     public String convertTo(Number from, Locale locale) {
         boolean neg = from.doubleValue() < 0;
         long iFrom = Math.abs(from.longValue());
+        long dFrom = Symbols.getFractionalComponent(Math.abs(from.doubleValue()), locale);
+
+        if (iFrom == 0 && dFrom == 0) {
+            return "nulla";
+        }
 
         StringBuilder output = new StringBuilder();
 
@@ -20,17 +25,12 @@ public class NumberToRoman implements Converter<Number, String> {
             output.append(d.getMinusSign());
         }
 
-        // 99
-        // XXXXXXXXXIX
-
-        // IC
-
         parseLong(iFrom, output);
 
-        double dFrom = Math.abs(from.doubleValue());
+
         if (dFrom > 0) {
             output.append(d.getDecimalSeparator());
-            parseLong(Symbols.getFractionalComponent(dFrom, locale), output);
+            parseLong(dFrom, output);
         }
         return output.toString();
     }
@@ -53,22 +53,25 @@ public class NumberToRoman implements Converter<Number, String> {
 
     private void parseTens(PartitionedNumber n, StringBuilder output) {
 
+        long tens = n.tens();
+
         if (n.tens() == 0) {
             parseUnits(n, output);
             return;
         }
 
-        int index = Symbols.findNearest(n.tens());
+        int index = Symbols.findNearest((int)tens);
+
         int indexValue = Symbols.VALUES[index];
 
         if (indexValue == 10) {
-            // 80,90
-            parseUnits(n, output);
+            repeat(Symbols.TEN, 10 - n.tens(), output);
+
             output.append(Symbols.HUNDRED);
-            return;
+        } else {
+            repeat(Symbols.TEN, n.tens(), output);
         }
 
-        repeat(Symbols.TEN, n.tens(), output);
         parseUnits(n, output);
     }
 
@@ -82,12 +85,12 @@ public class NumberToRoman implements Converter<Number, String> {
 
         int indexValue = Symbols.VALUES[index];
 
-        if (indexValue < units) {
-            repeat(Symbols.ONE, units - indexValue, output);
+        if (units < indexValue) {
+            repeat(Symbols.ONE, indexValue - units, output);
         }
         output.append(Symbols.SYMBOLS[index]);
-        if (indexValue > units) {
-            repeat(Symbols.ONE, indexValue - units, output);
+        if (units > indexValue) {
+            repeat(Symbols.ONE, units - indexValue, output);
         }
     }
 

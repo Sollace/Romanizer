@@ -10,6 +10,10 @@ public class RomanToNumber implements Converter<String, Number> {
     @Override
     public Number convertTo(String from, Locale locale) {
 
+        if ("nulla".equalsIgnoreCase(from)) {
+            return 0;
+        }
+
         DecimalFormatSymbols d = DecimalFormatSymbols.getInstance(locale);
         boolean negative = false;
         if (from.charAt(0) == d.getMinusSign()) {
@@ -35,11 +39,15 @@ public class RomanToNumber implements Converter<String, Number> {
     }
 
     private long parseInteger(String from, int[] power) {
+        if ("0".contentEquals(from) || "nulla".equalsIgnoreCase(from)) {
+            return 0L;
+        }
+
         Stack<StackEntry> entries = new Stack<>();
         entries.add(new StackEntry());
 
         char[] characters = from.toCharArray();
-        for (int i = characters.length - 1; i >= 0; i--) {
+        for (int i = 0; i < characters.length; i++) {
             StackEntry head = entries.peek();
 
             if (characters[i] == Symbols.EXT_HUNDREDS.charAt(0)) {
@@ -54,10 +62,10 @@ public class RomanToNumber implements Converter<String, Number> {
 
             if (base == head.base) {
                 head.multiplier++;
+            } else if (base > head.base) {
+                head.multiplier *= -1;
+                entries.push(new StackEntry()).base = base;
             } else {
-                if (base < head.base) {
-                    head.multiplier *= -1;
-                }
                 entries.push(new StackEntry()).base = base;
             }
         }

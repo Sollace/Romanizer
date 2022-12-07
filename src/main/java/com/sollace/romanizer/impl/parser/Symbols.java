@@ -1,7 +1,6 @@
 package com.sollace.romanizer.impl.parser;
 
 import java.text.DecimalFormatSymbols;
-import java.util.Arrays;
 import java.util.Locale;
 
 public interface Symbols {
@@ -19,11 +18,21 @@ public interface Symbols {
 
     static int valueOf(char symbol) {
         symbol = Character.toUpperCase(symbol);
-        int index = Arrays.binarySearch(CHAR_SYMBOLS, symbol);
+        int index = indexOf(CHAR_SYMBOLS, symbol);
         if (index < 0) {
-            throw new NumberFormatException("Invalid symbol: \"" + symbol + "\".");
+            throw new NumberFormatException("Invalid symbol: \"" + symbol + "\". Check: " + (symbol == 'C'));
         }
         return VALUES[index + 1];
+    }
+
+    private static int indexOf(char[] chars, char symbol) {
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] == symbol) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     static int findNearest(int value) {
@@ -52,6 +61,9 @@ public interface Symbols {
         String[] wholeFacture = realNumber.split("\\" + d.getDecimalSeparator());
         if (wholeFacture.length > 2) {
             throw new NumberFormatException("Multiple fractional units: " + wholeFacture.length + " for input: " + realNumber);
+        }
+        if (wholeFacture.length < 2) {
+            return new String[] {realNumber, "0"};
         }
         return wholeFacture;
     }

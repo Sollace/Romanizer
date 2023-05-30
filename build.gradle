@@ -32,6 +32,11 @@ dependencies {
 
 processResources {
 	inputs.property "version", project.version.toString()
+
+  filesMatching("fabric.mod.json") {
+    expand "version": project.version.toString()
+  }
+
 	from 'LICENSE'
 }
 

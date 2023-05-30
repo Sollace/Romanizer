@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "romanizer",
+  "version": "${version}",
+  "name": "Romanizer",
+  "description": "Provides converters for roman numerals that prioritises conciseness",
+  "authors": [ "Sollace" ],
+  "contact": {
+    "sources": "https://github.com/Sollace/Romanizer",
+    "issues": "https://github.com/Sollace/Romanizer/issues"
+  },
+  "mixins": [],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": { },
+  "depends": { },
+  "suggests": { },
+  "custom": {
+    "modmenu": {
+      "badges": [ "library" ]
+    }
+  }
+}

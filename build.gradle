@@ -22,14 +22,6 @@ reckon {
 	stageFromProp('beta', 'rc', 'final')
 }
 
-repositories {
-	mavenLocal()
-}
-
-dependencies {
-
-}
-
 processResources {
 	inputs.property "version", project.version.toString()
 
@@ -42,4 +34,28 @@ processResources {
 
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+
+            pom {
+                name = "Romanizer"
+                description = "Provides converters for roman numerals that prioritises conciseness"
+                licenses {
+                    license {
+                        name = "MIT Public License"
+                        url = "https://tlo.mit.edu/learn-about-intellectual-property/software-and-open-source-licensing"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "sollace"
+                    }
+                }
+            }
+        }
+    }
 }
